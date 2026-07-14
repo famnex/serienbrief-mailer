@@ -98,7 +98,7 @@ function initSettingsForm() {
     };
 
     try {
-      const res = await fetch('/api/settings', {
+      const res = await fetch('api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings)
@@ -141,7 +141,7 @@ function initSettingsForm() {
     };
 
     try {
-      const res = await fetch('/api/settings/test', {
+      const res = await fetch('api/settings/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -164,7 +164,7 @@ function initSettingsForm() {
 
 async function loadSettings() {
   try {
-    const res = await fetch('/api/settings');
+    const res = await fetch('api/settings');
     const data = await res.json();
     if (data.success && data.settings) {
       smtpSettings = data.settings;
@@ -196,7 +196,7 @@ function initTemplateSave() {
     }
 
     try {
-      const res = await fetch('/api/save-template', {
+      const res = await fetch('api/save-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subject, body, recipient_column })
@@ -225,7 +225,7 @@ document.getElementById('btn-save-template').addEventListener('click', async () 
   const recipient_column = document.getElementById('recipient-column-select') ? document.getElementById('recipient-column-select').value : '';
 
   try {
-    const res = await fetch('/api/save-template', {
+    const res = await fetch('api/save-template', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subject, body, recipient_column })
@@ -243,7 +243,7 @@ document.getElementById('btn-save-template').addEventListener('click', async () 
 
 async function loadTemplate() {
   try {
-    const res = await fetch('/api/template');
+    const res = await fetch('api/template');
     const data = await res.json();
     if (data.success && data.template) {
       document.getElementById('email-subject').value = data.template.subject || '';
@@ -298,7 +298,7 @@ async function handleCSVFile(file) {
   formData.append('csvFile', file);
 
   try {
-    const res = await fetch('/api/upload-csv', {
+    const res = await fetch('api/upload-csv', {
       method: 'POST',
       body: formData
     });
@@ -489,7 +489,7 @@ function initDispatch() {
     };
 
     try {
-      const res = await fetch('/api/send-single', {
+      const res = await fetch('api/send-single', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -600,7 +600,7 @@ async function startBatchDispatch() {
   const recipientColumn = document.getElementById('recipient-column-select').value;
 
   try {
-    const response = await fetch('/api/send-batch', {
+    const response = await fetch('api/send-batch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -739,7 +739,7 @@ function appendConsoleLog(consoleElem, recipient, status, msg, isError) {
 // --- STATS AND LOGS (DASHBOARD) ---
 async function loadStatsAndLogs() {
   try {
-    const res = await fetch('/api/logs');
+    const res = await fetch('api/logs');
     const data = await res.json();
     
     if (data.success && data.logs) {
@@ -799,7 +799,7 @@ document.getElementById('btn-clear-logs').addEventListener('click', async () => 
   }
   
   try {
-    const res = await fetch('/api/logs', { method: 'DELETE' });
+    const res = await fetch('api/logs', { method: 'DELETE' });
     const data = await res.json();
     if (data.success) {
       loadStatsAndLogs();
