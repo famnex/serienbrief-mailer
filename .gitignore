@@ -1,0 +1,6 @@
+node_modules/
+emailer.db
+emailer.db-journal
+uploads/
+.env
+*.log

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Serienmailer & E-Mail-Manager</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Quill Rich Text Editor CDN -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+
+  <header>
+    <h1><i class="fa-solid fa-paper-plane"></i> Antigravity <span>Emailer</span></h1>
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="dashboard-tab"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+      <button class="tab-btn" data-tab="settings-tab"><i class="fa-solid fa-gears"></i> SMTP-Einstellungen</button>
+      <button class="tab-btn" data-tab="editor-tab"><i class="fa-solid fa-file-signature"></i> Entwurf & CSV</button>
+      <button class="tab-btn" data-tab="send-tab"><i class="fa-solid fa-paper-plane"></i> Versand-Center</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- DASHBOARD TAB -->
+    <section id="dashboard-tab" class="tab-content active">
+      <div class="dashboard-grid">
+        <div class="widget">
+          <span class="widget-title">Versendete E-Mails (Gesamt)</span>
+          <span class="widget-value" id="stat-total">0</span>
+        </div>
+        <div class="widget">
+          <span class="widget-title">Erfolgreich</span>
+          <span class="widget-value success" id="stat-success">0</span>
+        </div>
+        <div class="widget">
+          <span class="widget-title">Fehlgeschlagen</span>
+          <span class="widget-value danger" id="stat-failed">0</span>
+        </div>
+        <div class="widget">
+          <span class="widget-title">Zustellungsrate</span>
+          <span class="widget-value" id="stat-rate">0%</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><i class="fa-solid fa-list-check"></i> Letzte Versandaktivitäten</h2>
+        <div class="alert-box" id="no-logs-alert">
+          <i class="fa-solid fa-circle-info"></i>
+          <div>Noch keine E-Mails versendet oder keine Logs vorhanden.</div>
+        </div>
+        <div id="logs-container" style="display: none;">
+          <div class="btn-group" style="margin-top: 0; margin-bottom: 1rem; justify-content: flex-end;">
+            <button class="btn btn-danger btn-secondary" id="btn-clear-logs"><i class="fa-solid fa-trash-can"></i> Protokoll löschen</button>
+          </div>
+          <div class="log-console" id="dashboard-logs">
+            <!-- Dynamic log entries -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SMTP SETTINGS TAB -->
+    <section id="settings-tab" class="tab-content">
+      <div class="card">
+        <h2><i class="fa-solid fa-server"></i> SMTP-Server Konfiguration</h2>
+        <form id="settings-form">
+          <div class="form-group row-3">
+            <div>
+              <label for="smtp-host">SMTP Host-Adresse</label>
+              <input type="text" id="smtp-host" placeholder="z.B. smtp.example.com" required>
+            </div>
+            <div>
+              <label for="smtp-port">SMTP Port</label>
+              <input type="number" id="smtp-port" placeholder="z.B. 587" required>
+            </div>
+            <div>
+              <label for="smtp-secure">Verschlüsselung</label>
+              <select id="smtp-secure">
+                <option value="0">STARTTLS / Unverschlüsselt (Standard)</option>
+                <option value="1">SSL/TLS (Port 465)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group row-2">
+            <div>
+              <label for="smtp-user">Benutzername / E-Mail</label>
+              <input type="text" id="smtp-user" placeholder="SMTP-Benutzername oder E-Mail" required>
+            </div>
+            <div>
+              <label for="smtp-pass">Passwort</label>
+              <input type="password" id="smtp-pass" placeholder="SMTP-Passwort" required>
+            </div>
+          </div>
+
+          <div class="form-group row-2">
+            <div>
+              <label for="smtp-from-name">Absender-Name (Anzeigename)</label>
+              <input type="text" id="smtp-from-name" placeholder="z.B. Max Mustermann">
+            </div>
+            <div>
+              <label for="smtp-from-email">Absender-E-Mail-Adresse</label>
+              <input type="email" id="smtp-from-email" placeholder="z.B. info@example.com" required>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Einstellungen speichern</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2><i class="fa-solid fa-vial"></i> SMTP-Verbindung testen</h2>
+        <div class="form-group" style="max-width: 500px;">
+          <label for="test-recipient">Test-Empfänger-E-Mail</label>
+          <div style="display: flex; gap: 1rem;">
+            <input type="email" id="test-recipient" placeholder="empfaenger@example.com" style="flex: 1;">
+            <button class="btn btn-secondary" id="btn-send-test-connection"><i class="fa-solid fa-paper-plane"></i> Test-E-Mail senden</button>
+          </div>
+        </div>
+        <div id="test-connection-alert" style="margin-top: 1rem; display: none;"></div>
+      </div>
+    </section>
+
+    <!-- EDITOR & CSV TAB -->
+    <section id="editor-tab" class="tab-content">
+      <div class="split-container editor-split">
+        
+        <!-- Links (klein): CSV-Datei hochladen & Einstellungen -->
+        <div>
+          <div class="card">
+            <h2><i class="fa-solid fa-file-csv"></i> CSV-Datei hochladen</h2>
+            <div class="upload-zone" id="csv-drop-zone">
+              <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <p>CSV-Datei hierher ziehen oder klicken zum Auswählen</p>
+              <span>Format: Trennzeichen Semikolon (;), UTF-8-kodiert</span>
+            </div>
+
+            <div id="csv-info" style="display: none; margin-top: 1.5rem;">
+              <div class="form-group">
+                <label for="recipient-column-select">Empfänger-E-Mail Attribut (Spalte)</label>
+                <select id="recipient-column-select">
+                  <!-- Dynamic column options -->
+                </select>
+              </div>
+
+              <h3>Verfügbare Platzhalter</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                Klicken Sie auf einen Platzhalter, um ihn an der aktuellen Cursorposition im Betreff oder Inhalt einzufügen.
+              </p>
+              <div class="placeholder-list" id="placeholders-container">
+                <!-- Dynamic placeholder badges -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rechts (groß): E-Mail verfassen & Vorschautabelle -->
+        <div>
+          <!-- E-Mail verfassen -->
+          <div class="card">
+            <h2><i class="fa-solid fa-pen-to-square"></i> E-Mail verfassen</h2>
+            
+            <div class="form-group">
+              <label for="email-subject">Betreffzeile</label>
+              <input type="text" id="email-subject" placeholder="z.B. Wichtige Erstinformationen für {{Vorname}} {{Nachname}}" required>
+            </div>
+
+            <div class="form-group">
+              <label>Inhalt (WYSIWYG-Editor)</label>
+              <!-- Quill editor element -->
+              <div id="wysiwyg-editor"></div>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn btn-primary" id="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Vorlage & Einstellungen speichern</button>
+              <span id="template-save-status" style="align-self: center; margin-left: 1rem; color: var(--success-color); font-weight: 500; display: none;">
+                <i class="fa-solid fa-circle-check"></i> Gespeichert!
+              </span>
+            </div>
+          </div>
+
+          <!-- Vorschautabelle direkt darunter -->
+          <div class="card" id="csv-preview-card" style="display: none;">
+            <h2><i class="fa-solid fa-table"></i> CSV-Daten Vorschau</h2>
+            <div class="table-wrapper">
+              <table id="csv-table-preview">
+                <thead>
+                  <tr><!-- Dynamic headers --></tr>
+                </thead>
+                <tbody>
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+            <div class="table-stats">
+              <span id="csv-row-count">Einträge: 0</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- DISPATCH CENTER TAB -->
+    <section id="send-tab" class="tab-content">
+      <div class="card">
+        <h2><i class="fa-solid fa-clipboard-check"></i> Bereitschafts-Prüfung</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1.5rem;">
+          <div>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;"><i class="fa-solid fa-server"></i> SMTP-Status</h3>
+            <div class="alert-box" id="check-smtp-status">
+              <i class="fa-solid fa-circle-question"></i>
+              <div>Lade SMTP-Konfiguration...</div>
+            </div>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;"><i class="fa-solid fa-database"></i> Empfängerliste (CSV)</h3>
+            <div class="alert-box danger" id="check-csv-status">
+              <i class="fa-solid fa-circle-xmark"></i>
+              <div>Keine CSV-Daten geladen. Bitte im Tab "Entwurf & CSV" hochladen.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="split-container">
+        <!-- Links: Einzeltestversand -->
+        <div class="card" id="single-dispatch-panel">
+          <h2><i class="fa-solid fa-paper-plane"></i> Einzelne Test-E-Mail versenden</h2>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+            Wählen Sie einen Empfänger aus der hochgeladenen Liste, um eine personalisierte E-Mail an diesen Empfänger (oder eine alternative Test-Adresse) zu senden.
+          </p>
+
+          <div class="form-group">
+            <label for="select-recipient-row">Empfänger aus CSV wählen</label>
+            <select id="select-recipient-row" disabled>
+              <option value="">-- Zuerst CSV hochladen --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-group">
+              <input type="checkbox" id="chk-override-recipient">
+              <span>Alternative Test-E-Mail verwenden (Empfohlen)</span>
+            </label>
+            <div id="override-recipient-container" style="display: none; margin-top: 0.5rem;">
+              <input type="email" id="override-recipient-email" placeholder="z.B. test@mein-domain.de">
+              <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">
+                Die E-Mail wird personalisiert (mit den Daten des ausgewählten Empfängers), aber an DIESE Test-Adresse gesendet.
+              </span>
+            </div>
+          </div>
+
+          <button class="btn btn-secondary" id="btn-send-single" disabled><i class="fa-solid fa-envelope"></i> Einzelne Test-E-Mail senden</button>
+          <div id="single-dispatch-alert" style="margin-top: 1rem; display: none;"></div>
+        </div>
+
+        <!-- Rechts: Serienbrief-Massenversand -->
+        <div class="card" id="batch-dispatch-panel">
+          <h2><i class="fa-solid fa-mail-bulk"></i> Serienbrief-Massenversand</h2>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+            Starten Sie den Serienbrief-Versand an alle Kontakte aus der hochgeladenen CSV-Datei. Jeder Empfänger erhält eine personalisierte Version der E-Mail.
+          </p>
+
+          <div class="alert-box" style="margin-bottom: 1.5rem;">
+            <i class="fa-solid fa-triangle-exclamation" style="color: var(--warning-color);"></i>
+            <div>
+              <strong>Achtung:</strong> Es wird eine E-Mail an jede gelistete Person gesendet. Vergewissern Sie sich, dass Ihre SMTP-Konfiguration und der Entwurf korrekt sind.
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="btn-send-batch" disabled><i class="fa-solid fa-truck-fast"></i> Batch-Versand an alle starten</button>
+
+          <!-- Live Progress Panel -->
+          <div class="progress-panel" id="batch-progress-panel">
+            <div class="progress-text">
+              <span id="batch-progress-status">Versand wird vorbereitet...</span>
+              <span id="batch-progress-percent">0%</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar" id="batch-progress-bar"></div>
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-muted);" id="batch-progress-counter">
+              E-Mail 0 von 0 verarbeitet
+            </div>
+          </div>
+
+          <!-- Realtime Logs -->
+          <div class="log-console" id="batch-logs" style="display: none;">
+            <!-- Realtime logs appended here -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Quill JS Core and Theme -->
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

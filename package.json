@@ -1,0 +1,17 @@
+{
+  "name": "emailer",
+  "version": "1.0.0",
+  "description": "Simple web tool for sending customized emails with attachments and placeholders",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.13",
+    "sqlite3": "^5.1.7"
+  }
+}
