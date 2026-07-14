@@ -6,7 +6,7 @@ const fs = require('fs');
 const db = require('./db');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3011;
 
 // Middleware
 app.use(express.json({ limit: '50mb' }));
